@@ -4,6 +4,17 @@ HW #6
 hw6.py
 CPSC 310-01
 
+Purpose:
+	To do the same thing we've been doing all semester, but use
+	random forests as a classifier rather than the other characters we've seen
+	so far.
+Design:
+	Contrary to the past few times, this round, not every step gets its own 
+	function, especially given the fact that Step 1 wholly consists of 
+	creating an algorithm without exactly implementing it.
+Issues:
+	TBD. 
+
 '''
 
 import csv
@@ -46,6 +57,82 @@ def generate_test_and_remainder(table):
 	remainder = random_attribute_subset(table, 2*third_of_data)
 	return test, remainder
 
+
+'''
+Returns a list of pairs of training and validation sets. 
+'''
+
+def bootStrap(remainder, N): #Takes the big partition and bootstraps.
+    """
+    remainder: The table of instances not part of the test set.
+    N: The number of total decision trees we want.
+    """
+    listOfTrainVal = []
+    length = len(remainder)
+    for i in range(N):
+        twoPart = [[],[]]
+        for j0 in range(length):
+            inty = random.randrange(0,length)
+            twoPart[0].append(remainder[inty])
+        for j1 in range(length):
+            isIn = 0
+            for k0 in range(len(twoPart[0])):
+                if remainder[j1] == twoPart[0][k0]:
+                    isIn = 1
+            if isIn == 0:
+                twoPart[1].append(remainder[j1])
+        listOfTrainVal.append(twoPart)
+        
+    
+    return listOfTrainVal
+
+
+'''
+Gets discretized mpg rating
+'''
+def rate(x):   #Changes ratio mpg to ordinal mpg rating. I use this often.
+    4
+    
+    y = 0
+    if x <= 13.99999:
+        y = 1
+    elif x >= 14.0 and x < 15:
+        y = 2
+    elif x >= 15.0 and x < 17.0:
+        y = 3
+    elif x >= 17.0 and x < 20.0:
+        y = 4
+    elif x >= 20.0 and x < 24.0:
+        y = 5
+    elif x >= 24.0 and x < 27.0:
+        y = 6
+    elif x >= 27.0 and x < 31.0:
+        y = 7
+    elif x >= 31.0 and x < 37.0:
+        y = 8
+    elif x >= 37.0 and x < 45.0:
+        y = 9
+    elif x >= 45.0:
+        y = 10
+    return y
+
+
+'''
+Discretizes weight.
+'''
+def rateWeight(x): #Discretizes the weight into 5 categories
+    if x <= 1999.999:
+        y = 1
+    elif x >= 2000 and x < 2500:
+        y = 2
+    elif x >= 2500 and x < 3000:
+        y = 3
+    elif x >= 3000 and x < 3500:
+        y = 4
+    elif x >= 3500:
+        y = 5
+
+    return y
 '''
 returns the frequencis of all attributes in the instance set as a dictionary
 '''
