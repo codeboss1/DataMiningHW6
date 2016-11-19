@@ -8,10 +8,71 @@ Purpose:
 	To do the same thing we've been doing all semester, but use
 	random forests as a classifier rather than the other characters we've seen
 	so far.
-Design:
+Design Checklist:
 	Contrary to the past few times, this round, not every step gets its own 
 	function, especially given the fact that Step 1 wholly consists of 
 	creating an algorithm without exactly implementing it.
+	STEP 2:
+	Upon Titanic Data:
+		[] Get test set and remainder
+		[] use bootstrapping to get 20 training and validation sets.
+		[] create a decision tree for each of the above pairs F = 2.
+		[] ALSO CREATE STANDARD D TREE
+		[] get accuracy of each from the validation sets
+		[] pick 7 best trees,
+		[] apply those to test set, simple majority voting.
+		[] get accuracy/error rate for RF
+		[] make confusion matrix for RF
+		[] get accuracy/error rate for simple tree
+		[] make confusion matrix for simple tree
+	Upon Auto Data:
+		[] Get test set and remainder
+		[] use bootstrapping to get 20 training and validation sets.
+		[] create a decision tree for each of the above pairs F = 2.
+		[] ALSO CREATE STANDARD D TREE
+		[] get accuracy of each from the validation sets
+		[] pick 7 best trees,
+		[] apply those to test set, simple majority voting.
+		[] get accuracy/error rate for RF
+		[] make confusion matrix for RF
+		[] get accuracy/error rate for simple tree
+		[] make confusion matrix for simple tree
+	STEP 3:
+	Upon titanic data:
+		Nice thing here is much here doesn't need to be hard-coded
+		[] copy/paste the functions from Step 2 here.
+		[] change N, M, and F to whatever we want.
+		[] log the averages of the 5 runs with each setting.
+		[] Find the one with the best accuracy.
+		using those settings:
+			[] print out accuracy/error rate
+			[] print confusion matrix.
+		[] Also output normal decision tree's accuracy and error rate
+	Upon Auto Data:
+		Nice thing here is much here doesn't need to be hard-coded
+		[] copy/paste the functions from Step 2 here.
+		[] change N, M, and F to whatever we want.
+		[] log the averages of the 5 runs with each setting.
+		[] Find the one with the best accuracy.
+		using those settings:
+			[] print out accuracy/error rate
+			[] print confusion matrix.
+		[] Also output normal decision tree's accuracy and error rate
+	
+		
+	STEP 4:
+	Upon Wisconsin.dat:
+		List of attributes much longer now. 
+		[] copy/paste the functions from Step 2 here
+		[] change N, M, and F to whatever we want.
+		[] log the averages of the 5 runs with each setting.
+		[] Find the one with the best accuracy.
+		using those settings:
+			[] print out accuracy/error rate
+			[] print confusion matrix.
+		[] Also output normal decision tree's accuracy and error rate
+		
+	
 Issues:
 	TBD. 
 
@@ -182,7 +243,7 @@ def tdidt(instances, att_indexes, att_domains, class_index):
 	min_ent = pick_attribute(instances, att_indexes, class_index)
 
 
-def step2(instances):
+def step2(inst0, inst1):
 	pass
 	
 '''
@@ -192,7 +253,9 @@ def main():
 	print "==========================================="
 	print "STEP 1: "
 	print "==========================================="
-	table = read_csv('auto-data.txt')
+	table0 = read_csv('auto-data.txt')
+	table1 = read_csv('titanic.txt')
+	table2 = read_csv('wisconsin.dat')
 	print "Really nothing happens in Step 1. "
 	print "We just built the classifier and then actually use in Step 2"
 	print ""
@@ -200,7 +263,9 @@ def main():
 	print "==========================================="
 	print "STEP 2: "
 	print "==========================================="
-	step2(table)
+	step2(table0, table1)
+	step3(table0, table1)
+	step4(table2)
 
 
 if __name__ == '__main__':
