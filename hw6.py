@@ -182,6 +182,9 @@ def tdidt(instances, att_indexes, att_domains, class_index):
 	min_ent = pick_attribute(instances, att_indexes, class_index)
 
 
+def step2(instances):
+	pass
+	
 '''
 The main function
 '''
@@ -190,6 +193,14 @@ def main():
 	print "STEP 1: "
 	print "==========================================="
 	table = read_csv('auto-data.txt')
+	print "Really nothing happens in Step 1. "
+	print "We just built the classifier and then actually use in Step 2"
+	print ""
+	print ""
+	print "==========================================="
+	print "STEP 2: "
+	print "==========================================="
+	step2(table)
 
 
 if __name__ == '__main__':
