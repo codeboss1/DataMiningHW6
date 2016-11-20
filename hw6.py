@@ -3,7 +3,6 @@ Grant Ikehara, Cameron Healy, Dominic Soares
 HW #6
 hw6.py
 CPSC 310-01
-
 Purpose:
 	To do the same thing we've been doing all semester, but use
 	random forests as a classifier rather than the other characters we've seen
@@ -75,7 +74,6 @@ Design Checklist:
 	
 Issues:
 	TBD. 
-
 '''
 
 import csv
@@ -118,6 +116,20 @@ def generate_test_and_remainder(table):
 	remainder = random_attribute_subset(table, 2*third_of_data)
 	return test, remainder
 
+'''
+Puts autodata in a format we can deal with
+'''
+def rewriteTable(table): #Foregoes the whole auto-data table,
+    #Instead just uses a truncated table with 4 rows, easy format.
+    newTable = []
+    for i in range(len(table)):
+        row = []
+        row.append(float(table[i][1])) #cylinders
+        row.append(float(table[i][4])) #weight (discretized)
+        row.append(float(table[i][6])) #modelYear
+        row.append(float(table[i][0])) #mpg (discretized)
+        newTable.append(row)
+    return newTable
 
 '''
 Returns a list of pairs of training and validation sets. 
@@ -178,6 +190,158 @@ def rate(x):   #Changes ratio mpg to ordinal mpg rating. I use this often.
     return y
 
 
+
+"""
+Good ol' Decision Tree does the same as it always has.
+"""
+def DecisionTree(table,x, listOfAttributes, listOfLeaves, cLabel):
+    #Let's build a tree now, it's essentially a list of lists,
+    #either with another tree or leaf at each node. 
+    
+    
+    
+    if len(listOfAttributes) > 0 and isSame(table, cLabel) == 1:
+        
+        eList = []
+        for i in range(len(listOfAttributes)):
+            eList.append(calc_enew(table, i, cLabel))
+        
+        #print eList
+        #print listOfAttributes
+        entroMin = min(eList)
+        
+        for j in range(len(eList)):
+            if eList[j] == entroMin:
+                whatToRemove = j
+        iiq = listOfAttributes[j]#index in question, save in case we need.
+        listOfAttributes.remove(listOfAttributes[j])
+        eviq = eList[j] #entropy val in question
+        eList.remove(eList[j])
+        splitVar = j
+        """
+        print "entroMin",
+        print entroMin
+        print "splitVar",
+        print splitVar
+        """
+        
+        splitHelper = attribute_frequencies(table, splitVar, cLabel)
+        keys = splitHelper.keys()
+        #print keys
+    
+        i = 0
+        tablePart = [[] for i in range(len(splitHelper))]
+        listOfLeaves.append('Attribute')
+        listOfLeaves.append(splitVar)
+    
+        for j in range(len(table)):
+            for k in range(len(keys)):
+                if table[j][splitVar] == keys[k]:
+                    tablePart[k].append(table[j])
+                    #divide table into partitions.
+        
+        for j2 in range(len(tablePart)):
+            
+            bough = []
+            listOfLeaves.append(bough)
+            bough.append('Value')
+            
+            bough.append(tablePart[j2][0][splitVar])
+            branch = []
+            bough.append(branch)
+            
+            partStats(table, cLabel)
+            DecisionTree(tablePart[j2],x,listOfAttributes,branch,cLabel)
+            #Put a condition in calc_enew for sets of 0.
+            
+                        
+        listOfAttributes.append(iiq)
+        eList.append(eviq)
+        
+    
+    else:
+        #do something with leaves here.
+        listOfLeaves.append('Leaves')
+        listOfLeaves.append(partStats(table, cLabel))
+        x.append(table[0])
+        
+    
+
+    
+    return listOfLeaves, x
+
+
+'''
+Classifies instances for titanic
+'''
+def treeClassifier(tree, instance):
+    
+    guess = "yes"
+    if tree[0] == 'Leaves':
+        maxValue = 0
+        
+        for i in range(len(tree[1])):
+            if tree[1][i][1] > maxValue:
+                maxValue = tree[1][i][1]
+                guess = tree[1][i][0]
+                         
+    else:
+        for j in range(len(tree)-2):
+            
+            try:
+                if instance[tree[1]] == tree[j+2][1]:
+                    guess = treeClassifier(tree[j+2][2], instance)
+            except TypeError:
+                pass
+    return guess
+
+'''
+Classifies instances for autodata
+'''
+def treeClassifier1(tree, instance):
+    
+    guess = 10
+    if tree[0] == 'Leaves':
+        maxValue = 0
+        
+        for i in range(len(tree[1])):
+            if tree[1][i][1] > maxValue:
+                maxValue = tree[1][i][1]
+                guess = tree[1][i][0]
+                         
+    else:
+        for j in range(len(tree)-2):
+            
+            try:
+                if instance[tree[1]] == tree[j+2][1]:
+                    guess = treeClassifier(tree[j+2][2], instance)
+            except TypeError:
+                pass
+    if guess == "yes":
+        guess = 10
+    return guess
+
+'''
+Actually counts accuracy for titanic
+'''
+def guessaroo(tree, instance, P, TP):
+    P += 1
+    guess = treeClassifier(tree,instance)
+    if guess == instance[3]:
+        TP += 1
+    return guess, P, TP
+
+'''
+counts accuracy for autodata
+'''
+def guessaroo1(tree, instance, P, TP):
+    P += 1
+    guess = treeClassifier1(tree,instance)
+    if guess == instance[3]:
+        TP += 1
+    return guess, P, TP
+
+
 '''
 Discretizes weight.
 '''
@@ -194,6 +358,27 @@ def rateWeight(x): #Discretizes the weight into 5 categories
         y = 5
 
     return y
+
+
+
+'''
+Gets yes/no/1-10 when we have a leaf
+'''
+def partStats(table, cLabel): 
+    classVals = list(set(get_column(table, cLabel)))
+    stats = []
+    stats.append([table[0][cLabel], 1, len(table)])
+    for i in range(len(table)-1):
+        a = 0
+        for j in range(len(stats)):
+            if stats[j][0] == table[i+1][cLabel]:
+                stats[j][1] += 1
+                a = 1
+        if a == 0:
+            stats.append([table[i+1][cLabel], 1, len(table)])
+    return stats #spits back of a list of lists of freqs for various labels.
+
+
 '''
 returns the frequencis of all attributes in the instance set as a dictionary
 '''
@@ -212,15 +397,21 @@ def attribute_frequencies(instances, att_index, class_index):
 Calculates the E_new of the instance set and returns it
 '''
 def calc_enew(instances, att_index, class_index):
-	D = len(instances)
-	freqs = attribute_frequencies(instances, att_index, class_index)
-	E_new = 0
-	for att_val in freqs:
-		D_j = float(freqs[att_val][1])
-		probs = [(c/D_j) for (_, c) in freqs[att_val][0].items()]
-		E_D_j = -sum([p*log(p,2) for p in probs])
-		E_new += (D_j/D)*E_D_j
-	return E_new 
+    # get the length of the partition
+    D = len(instances)
+    # calculate the partition stats for att_index (see below)
+    freqs = attribute_frequencies(instances, att_index, class_index)
+    # find E_new from freqs (calc weighted avg)
+    E_new = 0
+    for att_val in freqs:
+        D_j = float(freqs[att_val][1])
+        probs = [(c/D_j) for (_, c) in freqs[att_val][0].items()]
+        for p in range(len(probs)):
+            if probs[p] == 0:
+                probs[p] = 1.0
+        E_D_j = -sum([p*math.log(p,2) for p in probs])
+        E_new += (D_j/D)*E_D_j
+    return E_new
 
 '''
 Returns the index of the attribute with the least entropy
@@ -232,6 +423,19 @@ def pick_attribute(instances, att_indexes, class_index):
 	min_ent = ents.index(min(ents))
 	return min_ent
 
+    
+'''
+As self-explanatory as it gets
+'''
+def getRidOfFirstLine(table): #Just for the titanic
+    i = 0
+    newtable = []
+    for row in table:
+        if i != 0:
+            newtable.append(table[i])
+        i +=1
+    return newtable
+
 '''
 Creates a decision tree recursively
 '''
@@ -242,9 +446,50 @@ def tdidt(instances, att_indexes, att_domains, class_index):
 		return instances
 	min_ent = pick_attribute(instances, att_indexes, class_index)
 
+"""
+Checks if all labels are the same.
+"""
+def isSame(table, classLabel): #checks for uniformity of class label.
+    isIt = 0
+    original = table[0][classLabel]
+    for i in range(len(table)):
+        if table[i][classLabel] != original:
+            isIt = 1
+    return isIt
+
+
+'''
+Gets a column in question.
+'''
+def get_column(table, ind): #parse all the data into different lists
+    listylist = [] #               0
+    i = 0            
+    for row in table: #Get nice subdivisions
+        listylist.append(table[i][ind])   
+        i += 1
+    i = 0
+    return (listylist)#return all of the lists
+
 
 def step2(inst0, inst1):
-	pass
+    #Get test and remainder for cars and titanics
+    carTest, carRemainder = generate_test_and_remainder(inst0)
+    tanTest, tanRemainder = generate_test_and_remainder(inst1)
+    carTrain = bootStrap(carRemainder, 20)
+    tanAtt = [0,1,2]
+    tanx = []
+    tanLOL = []
+    #LOL = List Of Leaves
+    tanTrain = bootStrap(tanRemainder, 20)
+    tree, x = DecisionTree(tanTrain[0][0],tanx,tanAtt,tanLOL,3)
+
+    
+
+def step3(inst0, inst1):
+    pass
+
+def step4(inst):
+    pass
 	
 '''
 The main function
@@ -254,7 +499,10 @@ def main():
 	print "STEP 1: "
 	print "==========================================="
 	table0 = read_csv('auto-data.txt')
+	table0 = getRidOfFirstLine(table0)
+	table0 = rewriteTable(table0)
 	table1 = read_csv('titanic.txt')
+	table1 = getRidOfFirstLine(table1)
 	table2 = read_csv('wisconsin.dat')
 	print "Really nothing happens in Step 1. "
 	print "We just built the classifier and then actually use in Step 2"
@@ -264,8 +512,15 @@ def main():
 	print "STEP 2: "
 	print "==========================================="
 	step2(table0, table1)
+	print "==========================================="
+	print "STEP 3: "
+	print "==========================================="
 	step3(table0, table1)
+	print "==========================================="
+	print "STEP 4: "
+	print "==========================================="
 	step4(table2)
+	print "Command is Complete."
 
 
 if __name__ == '__main__':
