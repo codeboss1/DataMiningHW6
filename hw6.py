@@ -122,7 +122,6 @@ def generate_test_and_remainder(table):
 '''
 Returns a list of pairs of training and validation sets. 
 '''
-
 def bootStrap(remainder, N): #Takes the big partition and bootstraps.
     """
     remainder: The table of instances not part of the test set.
@@ -143,8 +142,6 @@ def bootStrap(remainder, N): #Takes the big partition and bootstraps.
             if isIn == 0:
                 twoPart[1].append(remainder[j1])
         listOfTrainVal.append(twoPart)
-        
-    
     return listOfTrainVal
 
 
@@ -194,6 +191,7 @@ def rateWeight(x): #Discretizes the weight into 5 categories
         y = 5
 
     return y
+
 '''
 returns the frequencis of all attributes in the instance set as a dictionary
 '''
@@ -243,8 +241,25 @@ def tdidt(instances, att_indexes, att_domains, class_index):
 	min_ent = pick_attribute(instances, att_indexes, class_index)
 
 
+'''
+20 Bootstrap samples from remainder set
+Random subset size = 2
+7 best classifiers
+'''
 def step2(inst0, inst1):
-	pass
+        test, remainder = generate_test_and_remainder(inst1)
+        bootstrap = bootStrap(remainder, 20)
+        print "done with bootstrap"
+        accuracies = []
+        accuracy = 0
+        att_domains = [['first','second','third','crew'],['adult','child'],['male','female']]
+        for i in range(20):
+                #instances, att_indexes, class_index, random_att_subset
+                tree = tdidt(bootstrap[i],[0,1,2],att_domains,3,2)
+                #find accuracy here
+                accuracies.append(accuracy)
+        accuracies.sort()
+        top7 = accuracies[13:]  #get highest 7
 	
 '''
 The main function
@@ -255,7 +270,7 @@ def main():
 	print "==========================================="
 	table0 = read_csv('auto-data.txt')
 	table1 = read_csv('titanic.txt')
-	table2 = read_csv('wisconsin.dat')
+	table2 = read_csv('wisconsin.txt')
 	print "Really nothing happens in Step 1. "
 	print "We just built the classifier and then actually use in Step 2"
 	print ""
@@ -264,8 +279,8 @@ def main():
 	print "STEP 2: "
 	print "==========================================="
 	step2(table0, table1)
-	step3(table0, table1)
-	step4(table2)
+	#step3(table0, table1)
+	#step4(table2)
 
 
 if __name__ == '__main__':
