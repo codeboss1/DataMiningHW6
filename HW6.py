@@ -345,6 +345,33 @@ def treeClassifier1(tree, instance):
         guess = 5
     return guess
 
+
+'''
+Classifies instances for Wisconsin
+'''
+def treeClassifier2(tree, instance):
+    
+    guess = 2
+    if tree[0] == 'Leaves':
+        maxValue = 0
+        
+        for i in range(len(tree[1])):
+            if tree[1][i][1] > maxValue:
+                maxValue = tree[1][i][1]
+                guess = tree[1][i][0]
+                         
+    else:
+        for j in range(len(tree)-2):
+            
+            try:
+                if instance[tree[1]] == tree[j+2][1]:
+                    guess = treeClassifier(tree[j+2][2], instance)
+            except TypeError:
+                pass
+    if guess == "yes":
+        guess = 2
+    return guess
+
 '''
 Actually counts accuracy for titanic
 '''
@@ -366,7 +393,14 @@ def guessaroo1(tree, instance, P, TP):
         TP += 1
     return guess, P, TP
 
+def guessaroo2(tree, instance, P, TP):
+    P += 1
+    guess = treeClassifier2(tree,instance)
+    if guess == instance[9]:
+        TP += 1
 
+    
+    return guess, P, TP
 
 
 
@@ -596,8 +630,36 @@ def step4(inst):
     wisTrain = bootStrap(wisRemainder, 20)
     tree, x = DecisionTree(wisTrain[0][0],wisx,wisAtt,wisLOL,9)
     #print tree
+    TPwd = 0
+    Pwd = 0
+    for z in range(len(wisTest)):
+        uselessVar, Pwd, TPwd = guessaroo2(tree, wisTest[z],Pwd,TPwd)
+        if uselessVar == "2":
+            count = 2
+        else:
+            count = 1
+        if wisTest[z][9] == "4":
+            actual = 1
+        else:
+            actual = 2
+        mat1[actual-1][count] += 1
     
-    
+    mat1[0][3] = mat1[0][1] +mat1[0][2]
+    if mat1[0][3] != 0:
+        mat1[0][4] = 100*float(mat1[0][1])/mat1[0][3]
+    mat1[1][3] = mat1[1][1] +mat1[1][2]
+    if mat1[1][3] != 0:
+        mat1[1][4] = 100*float(mat1[1][2])/mat1[1][3]
+
+        
+    print "Wisconsin Tumors"
+    print "Decision Tree: accuracy: ",
+    print TPwd/float(Pwd),
+    print "error rate: ",
+    print 1 - TPwd/float(Pwd)
+
+    print tabulate(mat1, headers= ['Tumor?', '2', '4',
+                                    "Total", "Recognition "])
 	
 '''
 The main function
