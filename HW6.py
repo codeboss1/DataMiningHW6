@@ -516,6 +516,122 @@ def get_column(table, ind): #parse all the data into different lists
 
 
 def step2(inst0, inst1):
+
+    #Let's make a few matrices!
+    mat1 = [["yes", 0, 0, 0, 0],
+            ["no", 0, 0, 0, 0]]
+
+    m2= [[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+
+    mat3 = [["yes", 0, 0, 0, 0],
+            ["no", 0, 0, 0, 0]]
+
+
+    m4= [[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+         
+    #Get test and remainder for cars and titanic
+    carTest, carRemainder = generate_test_and_remainder(inst0)
+    tanTest, tanRemainder = generate_test_and_remainder(inst1)
+
+    #Get the necessary ingredients for a tree.
+    carTrain = bootStrap(carRemainder, 20)
+    tanAtt = [0,1,2]
+    carAtt = [0,1,2]
+    tanx = []
+    carx = []
+    tanLOL = []
+    carLOL = []
+    #LOL = List Of Leaves
+    tanTrain = bootStrap(tanRemainder, 20)
+    tree, x = DecisionTree(tanTrain[0][0],tanx,tanAtt,tanLOL,3)
+    treea, y= DecisionTree(carTrain[0][0],carx,carAtt,carLOL,3)
+    
+    Ptd = 0 #Count for just the titanic decision tree
+    TPtd = 0 #True positive count for just the titanic decision tree
+    Pad = 0 #Positive count for auto-data dtree
+    TPad = 0 #True positive count for auto-data dtree
+
+    #fill in confusion matrix and get P/TP for titanic.
+    for z in range(len(tanTest)):
+        uselessVar, Ptd, TPtd = guessaroo(tree, tanTest[z],Ptd,TPtd)
+        if uselessVar == "yes":
+            count = 1
+        else:
+            count = 2
+        if tanTest[z][3] == "yes":
+            actual = 1
+        else:
+            actual = 2
+        mat1[actual-1][count] += 1
+
+    #Do same for auto-data
+    for y in range(len(carTest)):
+        uselessVar, Pad, TPad = guessaroo1(treea, carTest[y],Pad,TPad)
+        actual = carTest[y][3]
+        carTest[y]
+        m2[int(actual-1)][int(uselessVar)] += 1
+
+    #Now get the totals and recognition rates
+    mat1[0][3] = mat1[0][1] +mat1[0][2]
+    if mat1[0][3] != 0:
+        mat1[0][4] = 100*float(mat1[0][1])/mat1[0][3]
+    mat1[1][3] = mat1[1][1] +mat1[1][2]
+    if mat1[1][3] != 0:
+        mat1[1][4] = 100*float(mat1[1][2])/mat1[1][3]
+
+    i = 0
+    for row in m2:
+        m2[i][11] = sum(m2[i])-(i+1)
+        if m2[i][11] != 0:
+            m2[i][12] = 100*float(m2[i][i+1])/m2[i][11]
+        i += 1
+
+    #Print the accuracy and results from titanic
+    print "Titanic"
+    print "Decision Tree: accuracy: ",
+    print TPtd/float(Ptd),
+    print "error rate: ",
+    print 1 - TPtd/float(Ptd)
+
+    #Print the confusion matrix from titanic.
+    print tabulate(mat1, headers= ['survived', 'yes', 'no',
+                                    "Total", "Recognition "])
+
+    #Print the results from the auto-data DTree
+    print "Cars and Stuff"
+    print "Decision Tree: accuracy: ",
+    print TPad/float(Pad),
+    print "error rate: ",
+    print 1 - TPad/float(Pad)
+
+    #Print the confusion matrix from the auto-data DTree
+    print tabulate(m2, headers= ['mpg', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+                              "Total", "Recognition "])
+
+
+def step3(inst0, inst1):
+
+#The Next few chunks of code from HERE:
+    #==================================
+    
     mat1 = [["yes", 0, 0, 0, 0],
             ["no", 0, 0, 0, 0]]
 
@@ -615,9 +731,11 @@ def step2(inst0, inst1):
     print tabulate(m2, headers= ['mpg', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
                               "Total", "Recognition "])
 
+#========================
+#To HERE is all repeat from step 2.
+#Now begins the new stuff.
 
-def step3(inst0, inst1):
-    pass
+
 
 def step4(inst):
     mat1 = [["2", 0, 0, 0, 0],
