@@ -1,7 +1,7 @@
 '''
 Grant Ikehara, Cameron Healy, Dominic Soares
-HW #6
-hw6.py
+HW #7
+hw7.py
 CPSC 310-01
 Purpose:
     To implement an a priori rule miner as opposed to the decision trees
@@ -253,27 +253,89 @@ def get_column(table, ind): #parse all the data into different lists
 
 
 
-        
+
+"""
+-------------------------------------------
+New functions for HW 7
+-------------------------------------------
+"""
+
+"""
+get_Lk(table, Lk-1):
+	For each A in Lk-1 and B in Lk-1:
+		If A[0:-1] == B[0:-1]:
+			Add AUB to Ck unless
+			aK-1 subset of AUB not in Lk-1
+	Set Lk to supported itemsets in Ck
+"""
+
+def get_all_subsets(table,itemset):
+    subsets = [] 
+    subsets.append(k_1_subsets(itemset))
+    for i in range(1, get_number_instances(table)):  #hoping break comes before end
+	if(get_Lk(table,i) == []):
+	    break
+	else:
+	    subsets.append(get_Lk(table,i))
+
+
+def k_1_subsets(itemset): 
+    result = [] 
+    for i in range(len(itemset)): 
+        result.append(itemset[:i] + itemset[i+1:] 
+    return result
+
+
+def get_min_support(table, percentage):
+    total_instances = count_instances(table)
+    number_instances_necesary = total_instances*percentage
+    return number_instances_necesary
+
+
+def get_support(table, attributeList, valueList):
+	count = 0
+	For row in table:
+	    mark = 0
+	    for item in row:
+                if attribute in attributeList == attribute in row:
+		    mark +=1
+	    if mark == len(attributeList):
+                count += 1
+	Return count
+
+        #Prior to executing this, do the immediately above function.
+
+	if number of instances with given L x R > minPct:
+	    return 1
+	else:
+	    return 0
+
+
+def count_instances(table):
+    """counts number of instances in table"""
+    instances = 0
+    for row in table:
+        instances += 1
+    return instances
+
+
+
+#Moving items from LHS to RHS cant increase confidence of a role
+#If no rules of RHS size k are confident, stop searching
+Def breakpoint(listofrules, min_support):
+    for rule in listofrules:	
+        if confidence(listofrules) < min_support:
+            return 0
+    return 1
 
     
 '''
 The main function
 '''
 def main():
-    print "==========================================="
-    print "STEP 1: "
-    print "==========================================="
-    table0 = read_csv('auto-data.txt')
-    table0 = getRidOfFirstLine(table0)
-    table0 = rewriteTable(table0)
-
-    table1 = read_csv('titanic.txt')
-    table1 = getRidOfFirstLine(table1)
-    table2 = read_csv('wisconsin.dat')
-
-    print "Really nothing happens in Step 1. "
-    print "We just built the classifier and then actually use in Step 2"
-    print ""
+    table = read_csv('titanic.txt')
+    
+    
     print "Command is Complete"
 
 if __name__ == '__main__':
