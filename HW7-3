@@ -192,22 +192,26 @@ def tabulator(table):
     print "================="
     print "Titanic"
     print "================="
-    z = [["null","null","null","null","null"]]
+    print ""
+    z = []
     
     print tabulate(z, headers= ["Left-Hand of Rule", "Right Side",
                                 "Support", "Confidence", "Lift"])
 
+
+    print ""
+    print ""
+    print ""
+    print ""
     print "================="
     print "Shroomapalooza"
     print "================="
-
-    x = [["null","null","null","null","null"]]
+    print ""
+    x = []
     
     print tabulate(x, headers= ["Left-Hand of Rule", "Right Side",
                                 "Support", "Confidence", "Lift"])
     
-
-
 
 '''
 The main function
