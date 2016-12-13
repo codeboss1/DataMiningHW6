@@ -185,7 +185,27 @@ def apriori_titanic(table, min_supp, min_conf):
                 ListOfAtts.append(item)
 
 
+'''
+Tabulation function. Once we have the rules, this arranges 'em nice and pretty.
+'''
+def tabulator(table):
+    print "================="
+    print "Titanic"
+    print "================="
+    z = [["null","null","null","null","null"]]
+    
+    print tabulate(z, headers= ["Left-Hand of Rule", "Right Side",
+                                "Support", "Confidence", "Lift"])
 
+    print "================="
+    print "Shroomapalooza"
+    print "================="
+
+    x = [["null","null","null","null","null"]]
+    
+    print tabulate(x, headers= ["Left-Hand of Rule", "Right Side",
+                                "Support", "Confidence", "Lift"])
+    
 
 
 
