@@ -1,0 +1,22 @@
+'''
+A priori algorithm for titanic
+'''
+def apriori_titanic(table, min_supp, min_conf):
+    ColsOfAtts = get_col_atts(table, 4)
+    ListOfAtts = []
+    for i in range(len(table)):
+        for j in range(len(table[i])):
+            if [
+                table[i][j],j] not in ListOfAtts:
+                ListOfAtts.append([table[i][j],j])
+    print ListOfAtts
+    ListOfSets = []
+    i = 1
+    for att1 in ListOfAtts:
+        for att2 in ListOfAtts:
+            support = get_support([att1[0], att2[0]], table)
+            print support
+            conf = get_confidence([att1, att2], table, [att1])
+            lift = get_lift([att1, att2], table, [att1], [att2])
+            if support >= min_supp:
+                pass
