@@ -32,13 +32,7 @@ Design Checklist:
         
     
 Issues:
-    We originally approached the problem sans algorithm, which very
-    quickly proved to be disastrous. We also ran into the issue of
-    not being able to check values that existed across attributes
-    (For example, the letter b exists as a value of both scar
-    (stalk color above ring) and scbr (stalk color below ring)).
-    Thus, we needed a way to differentiate. We solved this issue
-    by adding an index to the end of each attribute. 
+    TBD. 
 '''
 
 import csv
@@ -88,9 +82,6 @@ def get_column(table, ind): #parse all the data into different lists
     i = 0
     return (listylist)#return all of the lists
 
-'''
-Returns the frequency of the itemset
-'''
 '''
 Returns the frequency of the itemset
 '''
@@ -152,7 +143,7 @@ def get_col_atts(table, cols):
                 AttsInCol.append(item)
         ListOfAtts.append(AttsInCol)
     return ListOfAtts
-            
+
 def RHSandLHSok(RHS, LHS, ColsOfAtts):
     for listy in ColsOfAtts:
         for val1 in RHS:
@@ -219,12 +210,56 @@ def apriori_titanic(table, min_supp, min_conf):
                             break
                 ListOfRules.append([newLHS, newRHS])
                 i += 1
-    for row in ListOfRules:
-        print row
     return ListOfRules
 
 
-#asdfkjas;dlfkjasdf;lj;sdalkj;lsfdakj;ljsfda
+'''
+A priori algorithm for mushrooms
+'''
+def apriori_mushrooms(table, min_supp, min_conf, num_cols):
+    ColsOfAtts = get_col_atts(table, num_cols) #Sorts attribute values by attribute
+    ListOfAtts = []
+    for row in table:       #Creates list of un ordered attributes
+        for item in row:
+            if [item] not in ListOfAtts:
+                ListOfAtts.append([item])
+    FinalItemset = []
+    for Att in ListOfAtts:  #Adds attributes that meet min_supp to new L1
+        if get_support(Att, table) >= min_supp:
+            FinalItemset.append(Att)
+    Lnext = FinalItemset
+    while len(Lnext) != 0:  #Creates Ln lists of supportd attribute itemsets 
+        Lnext = get_Lk_from_Ck(Lnext, min_supp, ColsOfAtts, table)
+        for val in Lnext:
+            FinalItemset.append(val)
+    for item1 in FinalItemset:
+        for item2 in FinalItemset:
+            if set(item2) == set(item1) and item1 != item2:
+                FinalItemset.remove(item1)
+                break
+    ListOfRules = []
+    i = 1
+    for LHS in FinalItemset:   #Creates list of rules from supported itemsets
+        for RHS in FinalItemset:
+            support = get_support(LHS+RHS, table)
+            conf = get_confidence(LHS+RHS, table, LHS)
+            if RHSandLHSok(LHS, RHS, ColsOfAtts) and support >= min_supp and conf >= min_conf:
+                newLHS = []
+                newRHS = []
+                for att1 in LHS:
+                    for i in range(len(ColsOfAtts)):
+                        if att1 in ColsOfAtts[i]:
+                            newLHS.append([att1, i])
+                            break
+                for att2 in RHS:
+                    for j in range(len(ColsOfAtts)):
+                        if att2 in ColsOfAtts[j]:
+                            newRHS.append([att2, j])
+                            break
+                ListOfRules.append([newLHS, newRHS])
+                i += 1
+    return ListOfRules
+
 '''
 Function to get stuff proper
 '''
@@ -254,7 +289,7 @@ def tabulateCorrectly(listy,table):
             elif listy[i][1][j2][1] == 2:
                 y += "sex: " + listy[i][1][j2][0] + "    "
             else:
-                s += "survived: " + listy[i][1][j2][0] + "    "
+                y += "survived: " + listy[i][1][j2][0] + "    "
         newStructA.append(y)
         newStructA.append(newSupport(listy[i],table))
         newStructA.append(newConf(listy[i],table))
@@ -427,28 +462,42 @@ def newLift(inst, table):
         RHS.append(inst[1][i2][0])
     x = get_lift(itemSet, table, LHS, RHS)
     return x
-#alsdkjf ladjflkajsdf;lkj a;lsdjf;lkjasd;lfkja;lsdfjlkaasdlfkj
+
+'''
+Puts autodata in a format we can deal with
+'''
+def rewriteTable(table): #Foregoes the whole auto-data table,
+    #Instead just uses a truncated table with 4 rows, easy format.
+    newTable = []
+    for i in range(len(table)):
+        row = []
+        row.append(table[i][1]) 
+        row.append(table[i][4]) 
+        row.append(table[i][6]) 
+        row.append(table[i][0]) 
+        newTable.append(row)
+    return newTable
+
 '''
 The main function
 '''
 def main():
     print "==========================================="
-    print "STEP 1: "
+    print "Titanic"
     print "==========================================="
     table0 = read_csv('titanic.txt')
     table0 = getRidOfFirstLine(table0)
+    rules0 = apriori_titanic(table0, 0.25, 0.75)
+    tabulateCorrectly(rules0,table0)
 
-    xy = apriori_titanic(table0, 0.25, 0.75)
-    tabulateCorrectly(xy,table0)
-
+    print "==========================================="
+    print "Agaricus lepiota"
+    print "==========================================="
     table1 = read_csv('agaricus-lepiota.txt')
-    #apriori_titanic(table0, 0.1, 0.5)
-    x = [[[['crew', 0], ['adult', 1]], [['female', 2]]],
-          [[['crew',0], ['yes', 3], ['child', 1]], [['male', 2]]]]
-    tabulateCorrectly(x,table0)
-    y = [[[['b', 14], ['a', 6]], [['y', 2]]],
-          [[['e',10], ['r', 3], ['c', 1]], [['s', 2]]]]
-    tabulateCorrectlyS(y,table0)
+    table1 = rewriteTable(table1)
+    rules1 = apriori_mushrooms(table1, 0.25, 0.75, 4)
+    tabulateCorrectlyS(rules1,table1)
+
+
 if __name__ == '__main__':
     main()
-
